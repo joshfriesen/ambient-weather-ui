@@ -11,13 +11,15 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class WeatherData extends AsyncTask<String, Void, String> { //Async for background web stuff standard api
-
+    int temper=-1;
+    String wthr="l";
 
     @Override
     protected String doInBackground(String... strings) { //this method gets the json data from the api and puts into a string
+
         String result = ""; //JSON data
         URL url;
-        HttpURLConnection urldata = null; //this will be input from the main
+        HttpURLConnection urldata;
 
         try { //if user has no connection
             url = new URL(strings[0]); //takes in url from parameter
@@ -114,11 +116,14 @@ public class WeatherData extends AsyncTask<String, Void, String> { //Async for b
                     break;
             }
 
+            temper=finaltemp;
+            wthr=finl;
 
 
             MainActivity.tempTV.setText(""+finaltemp+"° F");
             MainActivity.weatherTV.setText(finl);
             MainActivity.degrees=finaltemp;
+
 
         } catch (Exception e) { //too lazy to be more specific
             e.printStackTrace();
@@ -126,3 +131,4 @@ public class WeatherData extends AsyncTask<String, Void, String> { //Async for b
 
     }
 }
+
