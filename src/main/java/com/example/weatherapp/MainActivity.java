@@ -1,5 +1,9 @@
 package com.example.weatherapp;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -18,17 +22,24 @@ import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 public class MainActivity extends AppCompatActivity {
 
     //interactive UI stuff
     static TextView tempTV;
     static TextView weatherTV;
     static TextView skTV;
+    static TextView city;
     Switch s1;
     Switch s2;
     Switch s3;
     static ImageView im;
     SeekBar sk;
+    WeatherData weather = new WeatherData();
 
     //int output variables
     int brightness=0; //seekbar progress
@@ -52,28 +63,16 @@ public class MainActivity extends AppCompatActivity {
         s2= (Switch) findViewById(R.id.switch2);
         s3= (Switch) findViewById(R.id.switch3);
         sk= (SeekBar) findViewById(R.id.seekBar);
+        city= (TextView) findViewById(R.id.textView);
 
-        WeatherData weather = new WeatherData();  //weatherdata instance
+
         weather.execute("http://api.openweathermap.org/data/2.5/weather?q=Fresno,us&APPID=87e3c3bb474cc0be0e7747a2d9d2f1fb&units=imperial"); //api key
-
-       /* switch (wType){   didn't end up working
-            case 0:      //clouds
-                im.setImageResource(R.drawable.cloudy);
-                break;
-            case 1:      //clear
-                im.setImageResource(R.drawable.sunny);
-                break;
-            case 2:      //drizzle
-                im.setImageResource(R.drawable.drizzle);
-                break;
-            case 3:      //rain
-                im.setImageResource(R.drawable.rain);
-                break;
-            case 4:      //snow
-                im.setImageResource(R.drawable.snowy);
-                break;
+        if (wifi()){
+            city.setText("Fresno CA");
         }
-       */
+        else city.setText("");
+
+
         sk.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
@@ -185,16 +184,55 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    //checks to see if there if device is connected to a wireless network
+    public boolean wifi() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        Network temp = cm.getActiveNetwork();
+        boolean rsl = temp != null;
+        return rsl;
+
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
+        city= (TextView) findViewById(R.id.textView);
+
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        switch (id){
+            case R.id.fresno:
+                new WeatherData().execute("http://api.openweathermap.org/data/2.5/weather?q=Fresno,us&APPID=87e3c3bb474cc0be0e7747a2d9d2f1fb&units=imperial");
+
+                if (wifi()==true){
+                    city.setText("Fresno CA");
+                    im.setVisibility(View.VISIBLE);
+                }
+                else {
+                    tempTV.setText("No\nConnection");
+                    weatherTV.setText("");
+                    city.setText("");
+                    im.setVisibility(View.INVISIBLE);
+                }
+                break;
+            case R.id.ny:
+                new WeatherData().execute("http://api.openweathermap.org/data/2.5/weather?lat=45.5202&lon=-122.6747&APPID=87e3c3bb474cc0be0e7747a2d9d2f1fb&units=imperial");
+
+                if (wifi()) {
+                    city.setText("Portland OR");
+                    im.setVisibility(View.VISIBLE);
+                }
+                else{
+                    tempTV.setText("No\nConnection");
+                    weatherTV.setText("");
+                    city.setText("");
+                    im.setVisibility(View.INVISIBLE);
+                }
+
+                break;
         }
 
         return super.onOptionsItemSelected(item);
